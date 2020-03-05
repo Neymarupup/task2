@@ -232,7 +232,6 @@ class Editprofile extends React.Component {
       city,
       birthday,
       aboutMe,
-      avatarUri: this.state.imageUri,
       gender: this.state.gender,
       uid: uid,
       lattitude,
