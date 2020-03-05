@@ -112,8 +112,9 @@ class Signup extends React.Component {
                 AsyncStorage.setItem('email', user.user.email);
                 AsyncStorage.setItem('password', this.state.password);
                 AsyncStorage.setItem('uid', user.user.uid);
+                AsyncStorage.setItem('newUser', 'newUser');
                 self.RegisterVoxim(user)
-                Actions.tabbar()
+                Actions.Editprofile();
             })
             .catch((error) => {
                 alert(error.message)

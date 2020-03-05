@@ -100,7 +100,8 @@ class Editprofile extends React.Component {
       this.setState({firstname: firstname});
       this.setState({lastname: lastname});
       this.setState({occupation: occupation});
-      this.setState({city: city});
+      if(city !== null)
+        this.setState({city: city});
       this.setState({aboutme: aboutme});
       this.setState({birthday: birthday});
       this.setState({imageUri: avatarUri});

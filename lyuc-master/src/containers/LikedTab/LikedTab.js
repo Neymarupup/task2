@@ -57,7 +57,7 @@ class LikedTab extends React.Component {
                             >
                                 <View>
                                     <Image source={{uri: item.avatarUri}}
-                                        style={{ height: 70, width: 70, marginLeft:10 }}>
+                                        style={{ height: 70, width: 70, marginLeft:10, borderRadius: 35}}>
                                     </Image>
                                 </View>
                                 <View style={{marginLeft:20,alignSelf:'center'}}>
