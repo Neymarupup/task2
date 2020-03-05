@@ -65,7 +65,14 @@ class Login extends React.Component {
                     AsyncStorage.setItem('password', self.state.password);
                     AsyncStorage.setItem('uid', user.user.uid);
                     self.loginVoxim(user.user.email, self.state.password)
-                    Actions.tabbar()
+                    firebase.database().ref('Users/' + user.user.uid).once('value', function (snapshot) {
+                       if(snapshot.exists() === true) {
+                            Actions.tabbar()
+                       } else {
+                           Actions.Editprofile();
+                       }
+                    })
+                    
                 })
                 .catch((error) => {
                     alert(error.message);
