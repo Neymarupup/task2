@@ -32,8 +32,15 @@ class Splash extends React.Component {
             setTimeout(async() => {
                 await AsyncStorage.getItem('uid').then((uid)=>{
                     if(uid !== null){
-                        self.loginVoxim(email, password)
-                        Actions.tabbar();
+                        AsyncStorage.getItem('newUser').then((newUser) => {
+                            if(newUser !== 'newUser')
+                                {
+                                    self.loginVoxim(email, password)
+                                    Actions.tabbar();
+                                }
+                            else
+                            Actions.AppIntro()
+                        })                        
                     }
                     else
                         Actions.AppIntro()

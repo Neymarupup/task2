@@ -8,7 +8,8 @@ import {
   TextInput,
   ScrollView,
   AsyncStorage,
-  StyleSheet
+  StyleSheet,
+  Platform
 } from "react-native";
 import { Actions } from "react-native-router-flux";
 import styles from "./styles";
@@ -24,6 +25,7 @@ import DatePicker from 'react-native-datepicker'
 import ImagePicker from "react-native-image-crop-picker";
 import * as firebase from 'firebase';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import RNFetchBlob from 'react-native-fetch-blob'
 
 var width = Dimensions.get("window").width; //full width
 var height = Dimensions.get("window").height; //full height
@@ -44,26 +46,68 @@ class Editprofile extends React.Component {
       gender: 'male',
       city: '',
       lattitude: 0,
-      longitude: 0
+      longitude: 0,
+      myUid: '',
+      fAvatarChanged: false,
+      fPictureChanged: false
     };
   }
   async componentDidMount() {
-    firstname = await AsyncStorage.getItem('firstName');
-    lastname = await AsyncStorage.getItem('lastName');
-    occupation = await AsyncStorage.getItem('occupation');
-    city = await AsyncStorage.getItem('city');
-    aboutme = await AsyncStorage.getItem('aboutMe');
-    birthday = await AsyncStorage.getItem('birthday');
-    avatarUri = await AsyncStorage.getItem('avatarUri');
-    gender = await AsyncStorage.getItem('gender')
-    this.setState({firstname: firstname});
-    this.setState({lastname: lastname});
-    this.setState({occupation: occupation});
-    this.setState({city: city});
-    this.setState({aboutme: aboutme});
-    this.setState({birthday: birthday});
-    this.setState({imageUri: avatarUri});
-    this.setState({gender: gender});
+    const newUser = await AsyncStorage.getItem('newUser');
+    if(newUser === 'newUser') {
+      myUid = await AsyncStorage.getItem('uid');
+      this.setState({myUid: myUid});
+    }
+    else{
+      const uid = await AsyncStorage.getItem('uid')
+      const dataUrl = 'Users/' + uid;
+      var data;
+      var fExistPictures = false;
+      firebase.database().ref(dataUrl + '/pictures').once('value', function (snapshot) {
+        if(snapshot.numChildren() !== 0) {
+            data = snapshot;
+            fExistPictures = true;
+          } 
+        }).then(()=>{
+          if(fExistPictures === true) {
+            let index = 1;
+            data.forEach(()=>{
+              const picture = data.child('picture' + index.toString()).val();
+              this.setState({myPicture: [...this.state.myPicture, picture]});
+              index ++;
+            });
+          }
+        }).catch((error) => {
+          // alert(error)
+        })
+      firebase.database().ref(dataUrl).once('value', function (snapshot) {
+        data = snapshot
+      }).then(()=>{
+        this.setState({lattitude: data.child('lattitude').val()});
+        this.setState({longitude: data.child('longitude').val()});
+      }).catch((error) => {
+        // alert(error)
+      })
+      firstname = await AsyncStorage.getItem('firstName');
+      lastname = await AsyncStorage.getItem('lastName');
+      occupation = await AsyncStorage.getItem('occupation');
+      city = await AsyncStorage.getItem('city');
+      aboutme = await AsyncStorage.getItem('aboutMe');
+      birthday = await AsyncStorage.getItem('birthday');
+      avatarUri = await AsyncStorage.getItem('avatarUri');
+      gender = await AsyncStorage.getItem('gender')
+      myUid = await AsyncStorage.getItem('uid');
+      this.setState({firstname: firstname});
+      this.setState({lastname: lastname});
+      this.setState({occupation: occupation});
+      if(city !== null)
+        this.setState({city: city});
+      this.setState({aboutme: aboutme});
+      this.setState({birthday: birthday});
+      this.setState({imageUri: avatarUri});
+      this.setState({gender: gender});
+      this.setState({myUid: myUid});
+    }
   }
 
   chooseFile = async () => {
@@ -76,20 +120,46 @@ class Editprofile extends React.Component {
       response = response[0];
     }
     if(response){
-        this.setState({imageUri: response.path});
-        // alert(firebase.storage()
-        // alert(firebase.auth().currentUser.email);
-        
-          // firebase
-          // .storage()
-          // .ref('st/1.png')
-          // .put(response.path).then(()=>{
-          //   alert("ss")
-          // }).catch(()=>{
-          //   alert('error');
-          // })
-      // alert("asdf");
+      this.setState({imageUri: response.path, fAvatarChanged: true});
     }
+  }
+
+  uploadToFirebaseStorage(uri, uploadType, fileName, mime = 'image/jpeg') {
+    return new Promise((resolve, reject) => {
+      // Prepare Blob support
+      const Blob = RNFetchBlob.polyfill.Blob
+      const fs = RNFetchBlob.fs
+      window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
+      window.Blob = Blob
+
+      const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+      let uploadBlob = null
+      let imageRef;
+      const storagePath = 'image/' + this.state.myUid;
+      if(uploadType === 'avatar')
+       imageRef = firebase.storage().ref(storagePath).child(fileName)
+      if(uploadType === 'picture')
+        imageRef = firebase.storage().ref(storagePath).child(fileName);
+
+      fs.readFile(uploadUri, 'base64')
+        .then((data) => {
+          return Blob.build(data, { type: `${mime};BASE64` })
+        })
+        .then((blob) => {
+          uploadBlob = blob
+          return imageRef.put(blob, { contentType: mime })
+        })
+        .then(() => {
+          uploadBlob.close()
+          return imageRef.getDownloadURL()
+        })
+        .then((url) => {
+          resolve(url)
+        })
+        .catch((error) => {
+          reject(error)
+      })
+    })
   }
 
   uploadMyPicture = async () => {
@@ -103,10 +173,17 @@ class Editprofile extends React.Component {
     }
     if(response){
       this.setState({myPicture: [...this.state.myPicture, response.path]})
+      this.setState({fPictureChanged: true});
     }
   }
 
   onSaveChange = async () => {
+
+    if(this.checkEmptyField() === false) {
+      alert("Please input all fields")
+      return;
+    }
+
     const emailAddress = await AsyncStorage.getItem('email');
     const firstName = this.state.firstname;
     const lastName = this.state.lastname;
@@ -118,6 +195,34 @@ class Editprofile extends React.Component {
     const longitude = this.state.longitude;
     const uid = await AsyncStorage.getItem('uid');
     const dataUrl = 'Users/' + uid;
+    /* upload files */
+    if(this.state.fAvatarChanged) {
+      await this.uploadToFirebaseStorage(this.state.imageUri, 'avatar', 'avatar.jpeg')
+      .then(url => {  //url -> downloadUrl
+        firebase.database().ref(dataUrl).update({
+          avatarUri: url
+        }).then((data) =>{
+
+        }).catch((error)=>{
+          alert('upload picture failed')
+        })
+      })
+    }
+    if(this.state.fPictureChanged) {
+      for (let index = 0; index < this.state.myPicture.length; index ++) {
+        const fileName = 'picture' + (index + 1).toString();
+        this.uploadToFirebaseStorage(this.state.myPicture[index], 'picture', fileName + '.jpeg')
+          .then(url =>{
+            firebase.database().ref(dataUrl + '/pictures').update({
+              [fileName]: url
+            }).then((data) =>{
+
+            }).catch((error)=>{
+              alert('upload picture failed')
+            })
+          })
+      }
+    }
 
     firebase.database().ref(dataUrl).update({
       emailAddress,
@@ -140,10 +245,26 @@ class Editprofile extends React.Component {
       AsyncStorage.setItem('city', this.state.city);
       AsyncStorage.setItem('aboutMe', this.state.aboutMe);     
       AsyncStorage.setItem('gender', this.state.gender);    
+      AsyncStorage.removeItem('newUser');
       this.props.navigation.navigate('Myprofile', {updata: true});
     }).catch((error)=>{
       alert("fail");
     })
+  }
+
+  checkEmptyField() {
+    if(this.state.firstname === '' || this.state.lastname === '')
+      return false;
+    if(this.state.occupation === '')
+      return false;
+    if(this.state.birthday === '')
+      return false;
+    if(this.state.aboutme === '')
+      return false;
+    if(this.state.city === '')
+      return false;
+
+    return true;
   }
 
   render() {
@@ -301,6 +422,51 @@ class Editprofile extends React.Component {
               </Text>
             </View>
             <View style={{marginHorizontal: 25, marginTop: 10}}>
+              {this.state.city === '' && (
+                <GooglePlacesAutocomplete
+                  placeholder="input your address"
+                  minLength={2} // minimum length of text to search
+                  autoFocus={false}
+                  returnKeyType={"search"}
+                  listViewDisplayed="false"
+                  fetchDetails={true}
+                  onPress={(data, detail=null)=> {
+                    this.setState({city: data.description});
+                    this.setState({lattitude: detail.geometry.location.lat});
+                    this.setState({longitude: detail.geometry.location.lng});
+                  }}
+                  renderDescription={row =>
+                    row.description || row.formatted_address || row.name
+                  }
+                  getDefaultValue={() => {
+                    return ''
+                  }}
+                  query={{
+                    // available options: https://developers.google.com/places/web-service/autocomplete
+                    key: 'AIzaSyCyQpmp9mMFMVhjX9Dus1GlAvsxfOKERE0',
+                    language: 'en', // language of the results
+                    types: '(cities)', // default: 'geocode'
+                  }}
+                  styles={{
+                    textInput: {
+                        borderRadius: 0,
+                        marginLeft: 0,
+                        marginRight: 0,
+                        marginTop: 0,
+                        height: 40,
+                        borderWidth: 1,
+                        borderColor: '#000',
+                    },
+                    predefinedPlacesDescription: {
+                        color: '#1faadb',
+                    },
+                  }}
+                  filterReverseGeocodingByTypes={[
+                    'locality',
+                    'administrative_area_level_3',
+                  ]} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
+                />
+              )}
               {this.state.city !== '' && (
                 <GooglePlacesAutocomplete
                   placeholder="input your address"

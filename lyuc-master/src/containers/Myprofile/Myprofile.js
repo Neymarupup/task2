@@ -75,9 +75,9 @@ class Myprofile extends React.Component {
         await this.getMyData();
     }
 
-    // componentWillReceiveProps() {
-    //     this.getMyData();
-    // }
+    componentWillReceiveProps() {
+        this.getMyData();
+    }
 
     getMyData = async () => {
         const uid = await AsyncStorage.getItem('uid')
@@ -142,8 +142,11 @@ class Myprofile extends React.Component {
                                         </View>
                                         <View style={{ alignSelf: 'center' }}>
                                             <Text style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', textAlign: 'center', lineHeight: 25, }}>{this.state.firstName + ' ' + this.state.lastName}</Text>
-                                            <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold', lineHeight: 25, }}>{this.state.occupation} | {this.state.age} yrs.old | Female</Text>
-
+                                            <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold', lineHeight: 25, }}>
+                                                {this.state.occupation !== '' && (this.state.occupation + ' | ')}
+                                                {this.state.age !== '' && (this.state.age + 'yrs.old | ')}
+                                                {this.state.gender}
+                                            </Text>
                                             <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
                                                 <Image source={require('../../components/Images/location.png')}
                                                     style={{ width: 15, height: 15, tintColor: '#fff' }}>

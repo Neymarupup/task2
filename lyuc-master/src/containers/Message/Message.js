@@ -5,60 +5,41 @@ import {
 import { Actions } from 'react-native-router-flux';
 import AppHeader from '../../components/AppHeader';
 import styles from './styles';
+import * as firebase from 'firebase'
+
 var width = Dimensions.get('window').width; //full width
 var height = Dimensions.get('window').height; //full height
 
-const users = [
-    {
-        "image": require("../../components/Images/1.png"),
-        "name": "Ana Stellie",
-        "image1":require("../../components/Images/verified.png")
-        
-    },
-    {
-        "image": require("../../components/Images/profile2.png"),
-        "name": "Timsthey Phillips",
-        "image2":require("../../components/Images/error.png"),
-        "image1":require("../../components/Images/verified.png")
-    },
-    {
-        "image": require("../../components/Images/profile4.png"),
-        "name": "Timsthey Phillips",
-    },
-    {
-        "image": require("../../components/Images/profile6.png"),
-        "name": "Timsthey Phillips",
-    },
-    {
-        "image": require("../../components/Images/profile4.png"),
-        "name": "Timsthey Phillips",
-    },
-    {
-        "image": require("../../components/Images/1.png"),
-        "name": "Timsthey Phillips",
-    },
-    {
-        "image": require("../../components/Images/1.png"),
-        "name": "Timsthey Phillips",
-    },
-    {
-        "image": require("../../components/Images/profile4.png"),
-        "name": "Timsthey Phillips",
-    },
-    {
-        "image": require("../../components/Images/editimg.png"),
-        "name": "Timsthey Phillips",
-    },
-]
 
 class Message extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            email: '',
-            password: '',
+            matchedList: [],
         }
     }
+
+    async componentDidMount() {
+        const myUid = await AsyncStorage.getItem('uid');
+        var ref = firebase.database().ref("Users/" + myUid + '/matched');
+        ref.on('value', snapshot=>{
+            this.setState({matchedList: []});
+            snapshot.forEach((child) => {
+                const matched = child.child('matched').val();
+                if(matched === 0) {
+                    const matchedUid = child.child('uid').val();
+                    const dataRef = firebase.database().ref('Users/' + matchedUid);
+                    dataRef.once('value').then((data) => {
+                        const firstName = data.child('firstName').val();
+                        const lastName = data.child('lastName').val();
+                        const avatarUri = data.child('avatarUri').val();
+                        this.setState({matchedList: [...this.state.matchedList, {firstName: firstName, lastName: lastName, avatarUri: avatarUri, matchedUid: matchedUid}]});
+                    })
+                }
+            })
+        });
+    }
+
 
     render() {
         return (
@@ -67,10 +48,16 @@ class Message extends React.Component {
                     headerTitle={'CHAT AND VIDEO CALL'}
                 />
                 <FlatList
-                    data={users}
+                    data={this.state.matchedList}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) =>
-                    <TouchableOpacity onPress={() => Actions.MessageChat()}>
+                    renderItem={({ item, index }) =>
+                    <TouchableOpacity onPress={() => { 
+                        Actions.MessageChat({
+                            nameToChat: this.state.matchedList[index].firstName + ' ' + this.state.matchedList[index].lastName,
+                            uidTo: this.state.matchedList[index].matchedUid,
+                            avatarUri: this.state.matchedList[index].avatarUri 
+                        })}
+                    }>
                         <View style={{
                             flexDirection: 'row',
                             borderBottomWidth: 1,
@@ -81,22 +68,22 @@ class Message extends React.Component {
                         }}>
                             <View style={{ flexDirection: 'row', }}>
                                 <View>
-                                    <Image source={item.image}
-                                        style={{ height: 80, width: 80, }}>
+                                    <Image source={{uri: item.avatarUri}}
+                                        style={{ height: 80, width: 80, borderRadius: 40}}>
                                     </Image>
                                 </View>
                                 <View style={{ marginLeft: 20, alignSelf: 'center' }}>
-                                    <Text>{item.name}</Text>
+                                    <Text>{item.firstName + ' ' + item.lastName}</Text>
                                 </View>
                             </View>
-                            <View style={{ alignSelf: 'center', flexDirection: 'row',alignItems:'center',justifyContent:'center' }}>
+                            {/* <View style={{ alignSelf: 'center', flexDirection: 'row',alignItems:'center',justifyContent:'center' }}>
                                 <Image source={item.image1}
                                     style={{ height: 20, width: 20, }}>
                                 </Image>
                                 <Image source={item.image2}
                                     style={{ height: 20, width: 20, marginLeft: 10, tintColor:'#800000',}}>
                                 </Image>
-                            </View>
+                            </View> */}
                         </View>
                         </TouchableOpacity>
                     }
