@@ -56,6 +56,8 @@ export default class LoginManager {
             if (state === Voximplant.ClientState.DISCONNECTED) {
                 await this.client.connect();
             }
+            state = await this.client.getClientState();
+            console.log('===TEMP state = ', state)
             let authResult = await this.client.login(this.username, "Panda!123")
             await this._processLoginSuccess(authResult)
         } catch (e) {
@@ -173,6 +175,7 @@ export default class LoginManager {
     };
 
     async _processLoginSuccess(authResult) {
+        alert('login success')
         this.displayName = authResult.displayName;
 
         // save acceess and refresh token to default preferences to login using

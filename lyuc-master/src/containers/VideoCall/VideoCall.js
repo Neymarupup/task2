@@ -1,12 +1,13 @@
 import React from "react";
 import {
-    View, Text, Image, Dimensions, TouchableOpacity, PermissionsAndroid
+    View, Text, Image, Dimensions, TouchableOpacity, PermissionsAndroid, Platform
 } from "react-native";
 import { Actions } from 'react-native-router-flux';
 import AppHeader from '../../components/AppHeader';
 import {RFPercentage} from "react-native-responsive-fontsize";
 var width = Dimensions.get('window').width; //full width
 import { Voximplant } from 'react-native-voximplant'
+import CallManager from '../../manager/CallManager'
 
 class VideoCall extends React.Component {
     constructor(props) {
@@ -14,6 +15,8 @@ class VideoCall extends React.Component {
         this.state = {
 
         }
+        const callId = this.props.callId ? this.props.callId : null;
+        this.call = CallManager.getInstance().getCallById(callId);
     }
 
     handleIndexChange = index => {
@@ -32,6 +35,7 @@ class VideoCall extends React.Component {
 
     componentDidMount() {
         if (this.call) {
+            alert()
             Object.keys(Voximplant.CallEvents).forEach((eventName) => {
                 const callbackName = `_onCall${eventName}`;
                 if (typeof this[callbackName] !== 'undefined') {
@@ -88,24 +92,18 @@ class VideoCall extends React.Component {
     }
     declineCall() {
         this.call.decline();
+
     }
 
     _onCallDisconnected = (event) => {
+        alert()
         CallManager.getInstance().removeCall(event.call);
-        Actions.Home()
+        Actions.MessageChat()
     };
 
     _onCallEndpointAdded = (event) => {
         const displayName = event.endpoint.displayName
-        this.setState({ displayName: displayName }, () => {
-            this.getUserData(this.state.displayName)
-        });
     };
-
-
-    getUserData = (userEmail) => {
-        
-    }
 
     render() {
         return (
@@ -133,7 +131,7 @@ class VideoCall extends React.Component {
                         alignSelf: 'center', height: 60, marginTop: 20
                     }}>
                         <TouchableOpacity
-                            onPress={() => this.declineCall()}
+                            onPress={() =>  this.answerCall(false, this.state.profile_email)}
                         >
                             <View style={{}}>
                                 <Image style={{
@@ -142,7 +140,7 @@ class VideoCall extends React.Component {
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => this.answerCall(false, this.state.profile_email)}
+                            onPress={() =>this.declineCall()}
                         >
                             <View>
                                 <Image style={{

@@ -12,6 +12,9 @@ import Dialog, { DialogContent } from 'react-native-popup-dialog';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 import StarRating from 'react-native-star-rating';
 import { heightPercentageToDP } from "react-native-responsive-screen";
+import LoginManager from '../../manager/LoginManager'
+
+
 
 var width = Dimensions.get('window').width; //full width
 var height = Dimensions.get('window').height; //full height
@@ -39,6 +42,13 @@ class Setting extends React.Component {
             starCount: rating
         });
     }
+
+    logout = async() => {
+        AsyncStorage.clear();
+        await LoginManager.getInstance().logout()
+        Actions.LandingPage();
+    }
+
     render() {
         return (
             <View style={styles.mainContainer}>
@@ -82,8 +92,7 @@ class Setting extends React.Component {
                 </TouchableOpacity>
                 <TouchableOpacity 
                     onPress={() => {
-                        AsyncStorage.clear();
-                        Actions.LandingPage();
+                        this.logout()
                         }
                     }
                 >

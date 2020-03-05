@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1096293473407",
+    "firebase_url": "https://lynx-99b44.firebaseio.com",
+    "project_id": "lynx-99b44",
+    "storage_bucket": "lynx-99b44.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1096293473407:android:94c5814d292bc2ad0f734a",
+        "android_client_info": {
+          "package_name": "com.saveameal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1096293473407-5qnkeirtk821ikb2alq76dtif0e6om28.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saveameal",
+            "certificate_hash": "88d4bddb0949063084028be46edd0ffd26d4f0a9"
+          }
+        },
+        {
+          "client_id": "1096293473407-rk5q37tr81r6nfhd6rejc05tqgakll3t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIa7qygS9_YksE831dRqU_AqkV12GNwpc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1096293473407-487oeo6hngui1jvf2i9nc9hqbke0609a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    View, Text, Image, TouchableOpacity, PermissionsAndroid, Dimensions, Alert, AsyncStorage
+    View, Text, Image, TouchableOpacity, PermissionsAndroid, Dimensions, Alert, AsyncStorage, Platform
 } from "react-native";
 import { Actions } from 'react-native-router-flux';
 import { Voximplant } from 'react-native-voximplant';
@@ -72,7 +72,6 @@ class CallEnd extends React.Component {
                 Voximplant.Hardware.AudioDeviceManager.getInstance().on(eventName, this[callbackName]);
             }
         });
-
         this.callState = CALL_STATES.CONNECTING;
 
         (async () => {
@@ -233,6 +232,7 @@ class CallEnd extends React.Component {
     };
 
     _onCallConnected = (event) => {
+        console.log('===TEMP calling 5')
         if (this.state.watchStart === 'watchStart') {
             this.toggleStopwatch();
         }
