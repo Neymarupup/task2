@@ -71,8 +71,8 @@ class Editprofile extends React.Component {
         }).then(()=>{
           if(fExistPictures === true) {
             let index = 1;
-            data.forEach(()=>{
-              const picture = data.child('picture' + index.toString()).val();
+            data.forEach((child)=>{
+              const picture = child.val();
               this.setState({myPicture: [...this.state.myPicture, picture]});
               index ++;
             });
