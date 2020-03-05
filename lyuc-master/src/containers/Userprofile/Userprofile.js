@@ -77,6 +77,11 @@ class Userprofile extends React.Component {
             this.setState({age: age});
             this.setState({gender: data.child('gender').val()});  
 
+            this.setState({images: [...this.state.images, data.child('avatarUri').val()]});
+            for(index = 1; index <= data.child('pictures').numChildren(); index ++) {
+                this.setState({images: [...this.state.images, data.child('pictures').child('picture' + index.toString()).val()]})
+            }
+
             if(profileType === 'typical' || profileType === 'unliked') {
                 firebase.database().ref('Users/' + myUid + '/liked').once("value")
                 .then((snapshot) => {
@@ -110,7 +115,7 @@ class Userprofile extends React.Component {
             });
             ////////
             // this.setState({searchResult: [...this.state.searchResult, {fullName: fullName, avatarUri: avatarUri, city: city, uid: uid}]});
-            this.setState({images: [...this.state.images, data.child('avatarUri').val()]});
+            // this.setState({images: [...this.state.images, data.child('avatarUri').val()]});
         })
     }
 
