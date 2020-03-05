@@ -1,4 +1,4 @@
-package com.luyc;
+package com.savemeal;
 
 import com.facebook.react.ReactActivity;
 

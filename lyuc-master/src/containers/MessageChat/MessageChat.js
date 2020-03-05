@@ -19,7 +19,6 @@ class MessageChat extends React.Component {
             value: 30,
             value1: 30,
             email : 'someone199@gmail.com',
-            friend_id : '1112380',
             first_name : 'someone199',
             image : '',
             mobile : '',
@@ -81,7 +80,7 @@ class MessageChat extends React.Component {
                 isIncoming: false,
                 stopwatchRun: 'watchStart',
                 email: email,
-                fid: fid,
+                fid: '',
                 fname: fname,
                 fimg: fimg,
                 fmobile: fmobile

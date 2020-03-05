@@ -21,43 +21,15 @@ class CallEnd extends React.Component {
         super(props);
         this.callId = this.props.callId? this.props.callId : null
         this.state = {
-            modalVisible: false
+            modalVisible: false,
+            user_name: '',
+            user_avatar: '',
         }
         this.call = CallManager.getInstance().getCallById(this.callId)
     }
 
-    handleIndexChange = index => {
-        this.setState({
-            ...this.state,
-            selectedIndex: index
-        });
-    };
-
-    handleIndexChange1 = index => {
-        this.setState({
-            ...this.state,
-            selectedIndex1: index
-        });
-    };
-
-    toggleTimer() {
-        this.setState({ timerStart: !this.state.timerStart, timerReset: false });
-    }
-
-    resetTimer() {
-        this.setState({ timerStart: false, timerReset: true });
-    }
-
-    toggleStopwatch() {
-        this.setState({ stopwatchStart: !this.state.stopwatchStart, stopwatchReset: false });
-    }
-
-    resetStopwatch() {
-        this.setState({ stopwatchStart: false, stopwatchReset: true });
-    }
-
     componentDidMount() {
-        this.setState({ stateString: 'Ringing...' })
+        this.getUserData()
         if (this.call) {
             Object.keys(Voximplant.CallEvents).forEach((eventName) => {
                 const callbackName = `_onCall${eventName}`;
@@ -93,10 +65,6 @@ class CallEnd extends React.Component {
             }
         })();
     }
-    
-    toggleModal(visible) {
-        this.setState({ modalVisible: visible });
-    }
 
     componentWillUnmount() {
         if (this.call) {
@@ -113,6 +81,47 @@ class CallEnd extends React.Component {
                 Voximplant.Hardware.AudioDeviceManager.getInstance().off(eventName, this[callbackName]);
             }
         });
+    }
+
+    getUserData = () => {
+        this.setState({
+            name: this.props.fname,
+            user_avatar : this.props.fimg
+        })
+    }
+
+    handleIndexChange = index => {
+        this.setState({
+            ...this.state,
+            selectedIndex: index
+        });
+    };
+
+    handleIndexChange1 = index => {
+        this.setState({
+            ...this.state,
+            selectedIndex1: index
+        });
+    };
+
+    toggleTimer() {
+        this.setState({ timerStart: !this.state.timerStart, timerReset: false });
+    }
+
+    resetTimer() {
+        this.setState({ timerStart: false, timerReset: true });
+    }
+
+    toggleStopwatch() {
+        this.setState({ stopwatchStart: !this.state.stopwatchStart, stopwatchReset: false });
+    }
+
+    resetStopwatch() {
+        this.setState({ stopwatchStart: false, stopwatchReset: true });
+    }
+    
+    toggleModal(visible) {
+        this.setState({ modalVisible: visible });
     }
 
     muteAudio = () => {
@@ -195,7 +204,6 @@ class CallEnd extends React.Component {
     }
 
     _onCallFailed = (event) => {
-        console.log('===TEMP', event)
         if (event.reason === 'Decline') {
             Alert.alert('Call', 'Your calling was declined')
         }
@@ -232,7 +240,6 @@ class CallEnd extends React.Component {
     };
 
     _onCallConnected = (event) => {
-        console.log('===TEMP calling 5')
         if (this.state.watchStart === 'watchStart') {
             this.toggleStopwatch();
         }
@@ -327,10 +334,10 @@ class CallEnd extends React.Component {
                     <View style={{ marginTop: 90 }} >
                         <Image style={{
                             height: width / 3 + 20, width: width / 3 + 20, borderRadius: 70
-                        }} source={require("../../components/Images/people.jpeg")} />
+                        }} source={{uri: this.state.user_avatar}} />
                     </View>
                     <View style={{ marginTop: 10 }}>
-                        <Text style={{ color: '#fff', fontSize: RFPercentage(3), fontWeight: 'bold' }}>Jane Harrison</Text>
+                        <Text style={{ color: '#fff', fontSize: RFPercentage(3), fontWeight: 'bold' }}>{this.state.user_name}</Text>
                     </View>
                 </View>
                 <TouchableOpacity onPress={() => this.endCall()}

@@ -61,7 +61,6 @@ export default class CallKitManager {
     };
 
     _onRNCallKitPerformAnswerCallAction = (data) => {
-        alert()
         console.log('CallKitManager: _onRNCallKitPerformAnswerCallAction' + this.callId);
         Voximplant.Hardware.AudioDeviceManager.getInstance().callKitConfigureAudioSession();
         Actions.CallScreen({

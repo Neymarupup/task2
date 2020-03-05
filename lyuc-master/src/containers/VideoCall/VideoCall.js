@@ -35,7 +35,6 @@ class VideoCall extends React.Component {
 
     componentDidMount() {
         if (this.call) {
-            alert()
             Object.keys(Voximplant.CallEvents).forEach((eventName) => {
                 const callbackName = `_onCall${eventName}`;
                 if (typeof this[callbackName] !== 'undefined') {
@@ -96,7 +95,6 @@ class VideoCall extends React.Component {
     }
 
     _onCallDisconnected = (event) => {
-        alert()
         CallManager.getInstance().removeCall(event.call);
         Actions.MessageChat()
     };
